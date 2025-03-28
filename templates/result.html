@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watermarked Audio Result</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); }
+        h1 { color: #007bff; }
+        h3 { color: #333; }
+        p { font-weight: bold; }
+        audio { margin-top: 10px; width: 100%; }
+        canvas { margin-top: 20px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Watermarking Completed</h1>
+
+        <h3>Original Audio</h3>
+        <p>File Size: {{ (original_size / 1024) | round(2) }} KB</p>
+        <audio controls>
+            <source src="{{ url_for('uploaded_file', filename=original) }}" type="audio/wav">
+            Your browser does not support audio playback.
+        </audio>
+
+        <h3>Watermarked Audio</h3>
+        <p>File Size: {{ (processed_size / 1024) | round(2) }} KB</p>
+        <audio controls>
+            <source src="{{ url_for('processed_file', filename=processed) }}" type="audio/wav">
+            Your browser does not support audio playback.
+        </audio>
+
+        <h3>AI Voice Detection</h3>
+        <p {% set color = 'red' if detection = 'Fake' else 'green' %}
+         style="color: color ; font-size: 18px;">
+            AI Detection: {{ detection }}
+        </p>
+        
+        </p>
+
+        <h3>Noise Difference Visualization</h3>
+        <canvas id="noiseChart"></canvas>
+    </div>
+
+    <script>
+        let noiseData = JSON.parse('{{ noise_difference | tojson | safe }}');
+
+        let ctx = document.getElementById('noiseChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: noiseData.length }, (_, i) => i + 1),
+                datasets: [{
+                    label: 'Noise Difference',
+                    data: noiseData,
+                    borderColor: 'red',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { display: false }, y: { beginAtZero: true } }
+            }
+        });
+    </script>
+</body>
+</html>
